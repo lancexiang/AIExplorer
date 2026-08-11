@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- net48 is preinstalled on Win10/11; keeps Setup.exe small (no bundled .NET) -->
+    <TargetFramework>net48</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>..\..\src\AIExplorer.App\Assets\AIExplorer.ico</ApplicationIcon>
+    <AssemblyName>AIExplorer-Setup</AssemblyName>
+    <RootNamespace>AIExplorer.Setup</RootNamespace>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+</Project>

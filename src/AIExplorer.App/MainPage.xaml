@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="AIExplorer_App.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:vm="using:AIExplorer_App.ViewModels"
+    xmlns:local="using:AIExplorer_App.Views"
+    mc:Ignorable="d"
+    KeyboardAcceleratorPlacementMode="Hidden">
+
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator
+            Key="D"
+            Modifiers="Control"
+            Invoked="OnBookmarkAccelerator" />
+        <KeyboardAccelerator
+            Key="L"
+            Modifiers="Control"
+            Invoked="OnEditPathAccelerator" />
+        <KeyboardAccelerator
+            Key="Z"
+            Modifiers="Control"
+            Invoked="OnUndoDeleteAccelerator" />
+        <KeyboardAccelerator
+            Key="C"
+            Modifiers="Control"
+            Invoked="OnGlobalCopyAccelerator" />
+        <KeyboardAccelerator
+            Key="X"
+            Modifiers="Control"
+            Invoked="OnGlobalCutAccelerator" />
+        <KeyboardAccelerator
+            Key="V"
+            Modifiers="Control"
+            Invoked="OnGlobalPasteAccelerator" />
+    </Page.KeyboardAccelerators>
+
+    <Grid Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Chrome 式书签栏 -->
+        <Grid
+            Grid.Row="0"
+            MinHeight="{StaticResource AppChromeHeight}"
+            Padding="{StaticResource AppChromePadding}"
+            AllowDrop="True"
+            DragOver="OnFavoriteBarDragOver"
+            Drop="OnFavoriteBarDrop"
+            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+            BorderThickness="0,0,0,1"
+            Background="{ThemeResource SolidBackgroundFillColorSecondaryBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                AllowDrop="True"
+                DragOver="OnFavoriteBarDragOver"
+                Drop="OnFavoriteBarDrop"
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Disabled"
+                HorizontalScrollMode="Enabled"
+                VerticalScrollMode="Disabled">
+                <!-- ListView + CanDragItems：ItemsControl/Button 上 CanDrag 经常拖不起来 -->
+                <ListView
+                    x:Name="FavoriteBar"
+                    VerticalAlignment="Center"
+                    Height="32"
+                    SelectionMode="None"
+                    IsItemClickEnabled="True"
+                    CanDragItems="True"
+                    AllowDrop="True"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                    ScrollViewer.HorizontalScrollMode="Disabled"
+                    ScrollViewer.VerticalScrollMode="Disabled"
+                    ItemsSource="{x:Bind ViewModel.FavoriteBarItems, Mode=OneWay}"
+                    ItemClick="OnFavoriteBarListItemClick"
+                    ContainerContentChanging="OnFavoriteBarContainerContentChanging"
+                    DragItemsStarting="OnFavoriteBarDragItemsStarting"
+                    DragOver="OnFavoriteBarDragOver"
+                    Drop="OnFavoriteBarDrop">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsStackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="MinWidth" Value="0" />
+                            <Setter Property="MinHeight" Value="0" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0,0,2,0" />
+                            <Setter Property="HorizontalContentAlignment" Value="Left" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                            <Setter Property="AllowDrop" Value="True" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:FavoriteNodeViewModel">
+                            <Border
+                                Padding="10,4"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                CornerRadius="6"
+                                AllowDrop="True"
+                                Tag="{x:Bind}"
+                                ToolTipService.ToolTip="{x:Bind Subtitle}"
+                                DragOver="OnFavoriteItemDragOver"
+                                Drop="OnFavoriteItemDrop"
+                                RightTapped="OnFavoriteItemRightTapped"
+                                PointerEntered="OnFavoriteBarItemPointerEntered"
+                                PointerExited="OnFavoriteBarItemPointerExited">
+                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <FontIcon Glyph="{x:Bind IconGlyph}" FontSize="12" Foreground="{x:Bind GlyphBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind DisplayName}" FontSize="12" VerticalAlignment="Center" />
+                                    <FontIcon
+                                        Glyph="&#xE70D;"
+                                        FontSize="8"
+                                        Opacity="0.55"
+                                        VerticalAlignment="Center"
+                                        Visibility="{x:Bind IsGroup, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </ScrollViewer>
+
+            <StackPanel
+                Grid.Column="1"
+                Orientation="Horizontal"
+                Spacing="2"
+                VerticalAlignment="Center"
+                Margin="8,0,0,0">
+                <Button Style="{StaticResource AppToolButtonStyle}" Click="OnBookmarkCurrentClick" ToolTipService.ToolTip="收藏当前文件夹 (Ctrl+D)">
+                    <FontIcon Glyph="&#xE735;" FontSize="12" />
+                </Button>
+                <Button Style="{StaticResource AppToolButtonStyle}" Click="OnAddFavoriteGroupClick" ToolTipService.ToolTip="新建书签分组">
+                    <FontIcon Glyph="&#xE8F1;" FontSize="12" />
+                </Button>
+                <Button Style="{StaticResource AppToolButtonStyle}" Click="OnOpenSettingsClick" ToolTipService.ToolTip="设置">
+                    <FontIcon Glyph="&#xE713;" FontSize="12" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="56" />
+                <ColumnDefinition Width="{x:Bind ViewModel.NavigationPane.NavDrawerWidth, Mode=OneWay}" />
+                <ColumnDefinition Width="1" />
+                <ColumnDefinition Width="*" MinWidth="320" />
+            </Grid.ColumnDefinitions>
+
+            <!-- 竖直窄条：固定访问 + 盘符快捷图标 -->
+            <Grid
+                Grid.Column="0"
+                Background="{ThemeResource SolidBackgroundFillColorSecondaryBrush}"
+                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                BorderThickness="0,0,1,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <ListView
+                    x:Name="NavRailList"
+                    Padding="4,8,4,4"
+                    ItemsSource="{x:Bind ViewModel.NavigationPane.RailItems, Mode=OneWay}"
+                    SelectionMode="Single"
+                    IsItemClickEnabled="True"
+                    ItemClick="OnNavRailItemClick"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="2" />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="MinHeight" Value="44" />
+                            <Setter Property="MinWidth" Value="48" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:FolderTreeNode">
+                            <Grid
+                                Padding="2,4"
+                                ToolTipService.ToolTip="{x:Bind RailToolTip}">
+                                <StackPanel Spacing="2" HorizontalAlignment="Center">
+                                    <FontIcon
+                                        Glyph="{x:Bind Glyph}"
+                                        FontSize="16"
+                                        Foreground="{x:Bind GlyphBrush}"
+                                        HorizontalAlignment="Center" />
+                                    <TextBlock
+                                        Text="{x:Bind RailCaption}"
+                                        FontSize="10"
+                                        Opacity="0.85"
+                                        HorizontalAlignment="Center"
+                                        TextAlignment="Center"
+                                        TextTrimming="CharacterEllipsis"
+                                        MaxWidth="48" />
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <StackPanel Grid.Row="1" Spacing="2" Padding="4,4,4,8">
+                    <Button
+                        x:Name="NavDrawerToggle"
+                        Style="{StaticResource AppToolButtonStyle}"
+                        Width="36"
+                        Height="36"
+                        Click="OnToggleNavDrawerClick"
+                        ToolTipService.ToolTip="展开/收起目录树">
+                        <FontIcon Glyph="&#xE8A7;" FontSize="16" />
+                    </Button>
+                    <Button
+                        Style="{StaticResource AppToolButtonStyle}"
+                        Width="36"
+                        Height="36"
+                        Click="OnCollapseNavTreeClick"
+                        ToolTipService.ToolTip="收起目录树全部展开">
+                        <FontIcon Glyph="&#xE70D;" FontSize="14" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- 可展开目录树（深路径浏览） -->
+            <Grid
+                Grid.Column="1"
+                Background="{ThemeResource SolidBackgroundFillColorSecondaryBrush}"
+                Visibility="{x:Bind ViewModel.NavigationPane.IsNavDrawerExpanded, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TreeView
+                    x:Name="NavTree"
+                    Padding="2,6,2,6"
+                    SelectionMode="Single"
+                    ItemsSource="{x:Bind ViewModel.NavigationPane.TreeRoots, Mode=OneWay}"
+                    Expanding="OnNavTreeExpanding"
+                    ItemInvoked="OnNavTreeItemInvoked"
+                    RightTapped="OnNavTreeRightTapped">
+                    <TreeView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:FolderTreeNode">
+                            <TreeViewItem
+                                ItemsSource="{x:Bind Children, Mode=OneWay}"
+                                IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
+                                IsSelected="{x:Bind IsSelected, Mode=TwoWay}"
+                                MinHeight="28"
+                                Padding="0,1"
+                                ToolTipService.ToolTip="{x:Bind ToolTipText}">
+                                <Grid>
+                                    <TextBlock
+                                        Margin="8,6,8,4"
+                                        FontSize="11"
+                                        FontWeight="SemiBold"
+                                        CharacterSpacing="20"
+                                        Opacity="0.5"
+                                        Text="{x:Bind Name}"
+                                        Visibility="{x:Bind IsSectionHeader, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                    <StackPanel
+                                        Spacing="0"
+                                        Padding="2,0"
+                                        Visibility="{x:Bind IsSectionHeader, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Invert}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <FontIcon Glyph="{x:Bind Glyph}" FontSize="13" Foreground="{x:Bind GlyphBrush}" />
+                                            <TextBlock
+                                                Text="{x:Bind Name}"
+                                                FontSize="13"
+                                                TextTrimming="CharacterEllipsis"
+                                                VerticalAlignment="Center" />
+                                        </StackPanel>
+                                        <TextBlock
+                                            Text="{x:Bind AccessTimeText}"
+                                            FontSize="10"
+                                            Opacity="0.55"
+                                            Margin="21,0,0,0"
+                                            Visibility="{x:Bind AccessTimeVisibility}" />
+                                    </StackPanel>
+                                </Grid>
+                            </TreeViewItem>
+                        </DataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </Grid>
+
+            <Border
+                Grid.Column="2"
+                Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+
+            <!-- 搜索 / 标签条 / 内容 -->
+            <Grid x:Name="BrowserHost" Grid.Column="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid
+                    x:Name="SearchChrome"
+                    Grid.Row="0"
+                    Padding="8,6,10,6"
+                    Background="{ThemeResource SolidBackgroundFillColorSecondaryBrush}"
+                    BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                    BorderThickness="0,0,0,1"
+                    ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" MaxWidth="420" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 全局工具：主页 / 分栏 / 终端 / 在此打开 CMD -->
+                    <StackPanel
+                        Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="2"
+                        VerticalAlignment="Center">
+                        <Button
+                            Style="{StaticResource AppToolButtonStyle}"
+                            Click="OnOpenHomeClick"
+                            ToolTipService.ToolTip="主页">
+                            <FontIcon Glyph="&#xE80F;" FontSize="14" />
+                        </Button>
+                        <Button
+                            Style="{StaticResource AppToolButtonStyle}"
+                            Click="OnTabOverviewClick"
+                            ToolTipService.ToolTip="标签总览">
+                            <FontIcon Glyph="&#xE8A9;" FontSize="14" />
+                        </Button>
+                        <Rectangle
+                            Width="1"
+                            Height="14"
+                            Margin="4,0"
+                            Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                        <Button
+                            Style="{StaticResource AppToolButtonStyle}"
+                            Click="OnSplitLeftRightClick"
+                            ToolTipService.ToolTip="左右分栏（再次点击关闭）">
+                            <Border
+                                Width="16"
+                                Height="12"
+                                BorderBrush="{ThemeResource TextFillColorPrimaryBrush}"
+                                BorderThickness="1.5"
+                                CornerRadius="2">
+                                <Rectangle
+                                    Width="1.5"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Stretch"
+                                    Fill="{ThemeResource TextFillColorPrimaryBrush}" />
+                            </Border>
+                        </Button>
+                        <Button
+                            Style="{StaticResource AppToolButtonStyle}"
+                            Click="OnSplitTopBottomClick"
+                            ToolTipService.ToolTip="上下分栏（再次点击关闭）">
+                            <Border
+                                Width="16"
+                                Height="12"
+                                BorderBrush="{ThemeResource TextFillColorPrimaryBrush}"
+                                BorderThickness="1.5"
+                                CornerRadius="2">
+                                <Rectangle
+                                    Height="1.5"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Center"
+                                    Fill="{ThemeResource TextFillColorPrimaryBrush}" />
+                            </Border>
+                        </Button>
+                        <Button
+                            Style="{StaticResource AppToolButtonStyle}"
+                            Click="OnAddWorkspaceSlotClick"
+                            ToolTipService.ToolTip="再分一栏">
+                            <FontIcon Glyph="&#xE8FD;" FontSize="14" />
+                        </Button>
+                        <Rectangle
+                            Width="1"
+                            Height="14"
+                            Margin="4,0"
+                            Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                        <Button
+                            Style="{StaticResource AppToolButtonStyle}"
+                            Click="OnToggleTerminalClick"
+                            ToolTipService.ToolTip="终端：新目录新建，同目录切换/收起">
+                            <FontIcon Glyph="&#xE756;" FontSize="14" />
+                        </Button>
+                        <Button
+                            Style="{StaticResource AppToolButtonStyle}"
+                            Click="OnOpenCmdHereClick"
+                            ToolTipService.ToolTip="在此打开 CMD">
+                            <TextBlock Text="CMD" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </Button>
+                        <Button
+                            Style="{StaticResource AppToolButtonStyle}"
+                            Click="OnOpenPowerShellHereClick"
+                            ToolTipService.ToolTip="在此打开 PowerShell">
+                            <TextBlock Text="PS" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </Button>
+                    </StackPanel>
+
+                    <AutoSuggestBox
+                        x:Name="SearchBox"
+                        Grid.Column="1"
+                        QueryIcon="Find"
+                        Height="32"
+                        MinWidth="180"
+                        MaxWidth="420"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center"
+                        PlaceholderText="{x:Bind ViewModel.SearchPlaceholder, Mode=OneWay}"
+                        Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ItemsSource="{x:Bind ViewModel.SearchSuggestions, Mode=OneWay}"
+                        QuerySubmitted="OnSearchSubmitted"
+                        TextChanged="OnSearchTextChanged"
+                        KeyDown="OnSearchKeyDown" />
+
+                    <StackPanel
+                        Grid.Column="2"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        VerticalAlignment="Center"
+                        Margin="4,0,0,0">
+                        <CheckBox
+                            Content="当前文件夹"
+                            IsChecked="{x:Bind ViewModel.SearchInCurrentFolder, Mode=TwoWay}"
+                            IsEnabled="{x:Bind ViewModel.IsSearchScopeEnabled, Mode=OneWay}"
+                            Height="32"
+                            MinHeight="32"
+                            MinWidth="0"
+                            Padding="8,0,0,0"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            HorizontalContentAlignment="Left"
+                            FontSize="12"
+                            ToolTipService.ToolTip="Everything：勾选=仅当前文件夹；取消=全盘搜索。本地搜索仅支持当前文件夹。" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Opacity="0.5"
+                            FontSize="12"
+                            Text="{x:Bind ViewModel.SearchProviderHint, Mode=OneWay}" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- 标签 + 内容：PrimarySlotHost 为第 0 栏；副栏由代码动态挂 PaneTabHost -->
+                <Grid x:Name="BrowserArea" Grid.Row="1" Grid.RowSpan="2">
+                    <Grid
+                        x:Name="PrimarySlotHost"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="44" />
+                            <RowDefinition Height="1" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TabView
+                            x:Name="BrowserTabs"
+                            Grid.Row="0"
+                            VerticalAlignment="Stretch"
+                            HorizontalAlignment="Stretch"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            AddTabButtonClick="OnAddTabClick"
+                            AllowDropTabs="False"
+                            CanDragTabs="True"
+                            CanReorderTabs="True"
+                            CanTearOutTabs="False"
+                            IsAddTabButtonVisible="True"
+                            TabCloseRequested="OnTabCloseRequested"
+                            TabDragStarting="OnTabDragStarting"
+                            TabDragCompleted="OnTabDragCompleted"
+                            TabDroppedOutside="OnTabDroppedOutside"
+                            TabStripDragOver="OnTabStripDragOver"
+                            TabStripDrop="OnTabStripDrop"
+                            TabWidthMode="SizeToContent" />
+
+                        <Border
+                            x:Name="TabInsertCaret"
+                            Grid.Row="0"
+                            Width="3"
+                            Height="28"
+                            Margin="0,8,0,0"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Left"
+                            Visibility="Collapsed"
+                            IsHitTestVisible="False"
+                            Canvas.ZIndex="40"
+                            Background="{StaticResource AppAccentBrush}"
+                            CornerRadius="1" />
+
+                        <!-- 与副栏 PaneTabHost 同位置的底部分隔线，避免分栏处台阶 -->
+                        <Border
+                            Grid.Row="1"
+                            Background="{ThemeResource DividerStrokeColorDefaultBrush}"
+                            IsHitTestVisible="False" />
+
+                        <Grid
+                            x:Name="TabContentHost"
+                            Grid.Row="2"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Background="Transparent" />
+                    </Grid>
+
+                    <!-- 遗留：保留命名以免旧代码瞬时编译失败；RebuildWorkspace 会 Collapsed 并忽略 -->
+                    <TabView x:Name="ShellRightTabs" Visibility="Collapsed" IsHitTestVisible="False" />
+                    <Grid x:Name="RightShellContentHost" Visibility="Collapsed" IsHitTestVisible="False" />
+                    <Border x:Name="ShellSplitter" Visibility="Collapsed" IsHitTestVisible="False" />
+                </Grid>
+
+                <!-- 底部终端 Dock（多会话 ConPTY） -->
+                <Border
+                    x:Name="TerminalDock"
+                    Grid.Row="3"
+                    Height="260"
+                    Visibility="Collapsed"
+                    BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                    BorderThickness="0,1,0,0">
+                    <local:TerminalDockHost x:Name="TerminalPaneHost" />
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- 全局操作反馈：界面下半部居中，约 1s 后淡出 -->
+        <Border
+            x:Name="ActionToast"
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Margin="0,0,0,96"
+            Padding="22,12"
+            CornerRadius="12"
+            Opacity="0"
+            IsHitTestVisible="False"
+            Canvas.ZIndex="2000"
+            Background="#E6282C34"
+            BorderBrush="#40FFFFFF"
+            BorderThickness="1">
+            <TextBlock
+                x:Name="ActionToastText"
+                Foreground="White"
+                FontSize="14"
+                FontWeight="SemiBold"
+                Text="" />
+        </Border>
+    </Grid>
+</Page>

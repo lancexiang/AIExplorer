@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="AIExplorer_App.Views.BrowserTabView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:AIExplorer_App.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    HorizontalAlignment="Stretch"
+    VerticalAlignment="Stretch">
+
+    <Grid
+        x:Name="RootGrid"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Background="{ThemeResource SolidBackgroundFillColorBaseBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="PrimaryStar" Width="*" MinWidth="160" />
+            <ColumnDefinition x:Name="SplitterCol" Width="0" />
+            <ColumnDefinition x:Name="SecondaryStar" Width="0" MinWidth="0" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="PrimaryRow" Height="*" MinHeight="80" />
+            <RowDefinition x:Name="SplitterRow" Height="0" />
+            <RowDefinition x:Name="SecondaryRow" Height="0" MinHeight="0" />
+        </Grid.RowDefinitions>
+
+        <!-- 左侧：由顶部全局 Tab 管理，此处仅显示内容 -->
+        <Border
+            x:Name="LeftPaneHost"
+            Grid.Row="0"
+            Grid.Column="0"
+            Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+            BorderThickness="0">
+            <local:FilePaneControl
+                x:Name="LeftPaneControl"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch" />
+        </Border>
+
+        <Border
+            x:Name="Splitter"
+            Grid.Row="0"
+            Grid.Column="1"
+            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+            Visibility="Collapsed"
+            PointerPressed="OnSplitterPointerPressed"
+            PointerMoved="OnSplitterPointerMoved"
+            PointerReleased="OnSplitterPointerReleased"
+            PointerCaptureLost="OnSplitterPointerCaptureLost">
+            <Border
+                x:Name="SplitterVisual"
+                Background="{ThemeResource DividerStrokeColorDefaultBrush}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch" />
+        </Border>
+
+        <!-- 右侧：独立 Tab 条 + 内容 -->
+        <Border
+            x:Name="RightPaneHost"
+            Grid.Row="0"
+            Grid.Column="2"
+            Visibility="Collapsed"
+            Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+            BorderThickness="0">
+            <Grid Background="{ThemeResource SolidBackgroundFillColorBaseBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition x:Name="RightTabsRow" Height="Auto" />
+                    <RowDefinition x:Name="RightContentRow" Height="*" />
+                </Grid.RowDefinitions>
+
+                <TabView
+                    x:Name="RightGroupTabs"
+                    Grid.Row="0"
+                    VerticalAlignment="Top"
+                    Margin="0"
+                    Padding="0"
+                    TabWidthMode="SizeToContent"
+                    AllowDropTabs="True"
+                    CanDragTabs="True"
+                    CanReorderTabs="True"
+                    CanTearOutTabs="False"
+                    IsAddTabButtonVisible="True"
+                    AddTabButtonClick="OnRightGroupAddTab"
+                    TabCloseRequested="OnRightGroupTabClose"
+                    SelectionChanged="OnRightGroupSelectionChanged"
+                    Visibility="Collapsed" />
+
+                <Border x:Name="RightPaneContentHost" Grid.Row="1">
+                    <local:FilePaneControl
+                        x:Name="RightPaneControl"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch" />
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

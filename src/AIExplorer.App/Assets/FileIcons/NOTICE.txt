@@ -1,0 +1,4 @@
+Material Icon Theme (https://github.com/material-extensions/vscode-material-icon-theme)
+Copyright (c) Material Extensions Contributors
+Licensed under the MIT License.
+Icons vendored under Assets/FileIcons (classic 4.x set used by GitLab file trees).

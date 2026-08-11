@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="AIExplorer_App.Views.SearchResultsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:vm="using:AIExplorer_App.ViewModels"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Padding="0,4,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock
+            Grid.Row="0"
+            Margin="16,8,16,4"
+            Opacity="0.75"
+            Text="{Binding StatusText, Mode=OneWay}" />
+
+        <Grid
+            Grid.Row="1"
+            Padding="16,4,16,4"
+            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+            BorderThickness="0,0,0,1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="32" />
+                <ColumnDefinition Width="220" MinWidth="120" />
+                <ColumnDefinition Width="*" MinWidth="160" />
+                <ColumnDefinition Width="90" />
+                <ColumnDefinition Width="70" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="名称" Opacity="0.7" FontSize="12" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="2" Text="位置" Opacity="0.7" FontSize="12" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="3" Text="大小" Opacity="0.7" FontSize="12" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="4" Text="类型" Opacity="0.7" FontSize="12" VerticalAlignment="Center" />
+        </Grid>
+
+        <ListView
+            x:Name="ResultList"
+            Grid.Row="2"
+            IsItemClickEnabled="False"
+            DoubleTapped="OnListDoubleTapped"
+            RightTapped="OnListRightTapped"
+            ItemsSource="{Binding Results, Mode=OneWay}"
+            SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+            SelectionMode="Single">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                    <Setter Property="MinHeight" Value="32" />
+                    <Setter Property="Padding" Value="4,0" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutItem Text="打开" Click="OnOpenHitClick" />
+                    <MenuFlyoutItem Text="打开所在目录" Click="OnOpenContainingClick" />
+                    <MenuFlyoutItem Text="在资源管理器中显示" Click="OnRevealInExplorerClick" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem Text="复制完整路径" Click="OnCopyPathClick" />
+                </MenuFlyout>
+            </ListView.ContextFlyout>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="vm:SearchHitItemViewModel">
+                    <Grid Padding="8,0" MinHeight="28" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="32" />
+                            <ColumnDefinition Width="220" MinWidth="120" />
+                            <ColumnDefinition Width="*" MinWidth="160" />
+                            <ColumnDefinition Width="90" />
+                            <ColumnDefinition Width="70" />
+                        </Grid.ColumnDefinitions>
+                        <Grid
+                            Grid.Column="0"
+                            Width="18"
+                            Height="18"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left">
+                            <FontIcon
+                                Glyph="{x:Bind IconGlyph}"
+                                FontSize="14"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Visibility="{x:Bind HasBitmapIcon, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Invert}" />
+                            <Image
+                                Source="{x:Bind IconImage, Mode=OneWay}"
+                                Width="16"
+                                Height="16"
+                                Stretch="Uniform"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Visibility="{x:Bind HasBitmapIcon, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </Grid>
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Text="{x:Bind Name}"
+                            TextTrimming="CharacterEllipsis" />
+                        <TextBlock
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Opacity="0.75"
+                            FontSize="12"
+                            Text="{x:Bind LocationText}"
+                            TextTrimming="CharacterEllipsis" />
+                        <TextBlock
+                            Grid.Column="3"
+                            VerticalAlignment="Center"
+                            Opacity="0.75"
+                            FontSize="12"
+                            Text="{x:Bind SizeText}" />
+                        <TextBlock
+                            Grid.Column="4"
+                            VerticalAlignment="Center"
+                            Opacity="0.75"
+                            FontSize="12"
+                            Text="{x:Bind TypeText}" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <ProgressRing
+            Grid.Row="2"
+            Width="32"
+            Height="32"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            IsActive="{Binding IsSearching, Mode=OneWay}" />
+    </Grid>
+</UserControl>

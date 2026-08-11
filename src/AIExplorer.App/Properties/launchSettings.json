@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "AIExplorer.App (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "AIExplorer.App (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

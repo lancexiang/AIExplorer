@@ -1,0 +1,48 @@
+<UserControl
+    x:Class="AIExplorer_App.Views.PaneTabHost"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    HorizontalAlignment="Stretch"
+    VerticalAlignment="Stretch">
+
+    <!-- 行结构必须与 PrimarySlotHost 一致：44 标签 + 1 分隔线 + * 内容 -->
+    <Grid Background="{ThemeResource SolidBackgroundFillColorBaseBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="44" />
+            <RowDefinition Height="1" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TabView
+            x:Name="Tabs"
+            Grid.Row="0"
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Stretch"
+            Background="Transparent"
+            BorderThickness="0"
+            TabWidthMode="SizeToContent"
+            AllowDropTabs="False"
+            CanDragTabs="False"
+            CanReorderTabs="False"
+            CanTearOutTabs="False"
+            IsAddTabButtonVisible="True"
+            AddTabButtonClick="OnAddTabClick"
+            TabCloseRequested="OnTabCloseRequested"
+            SelectionChanged="OnSelectionChanged" />
+
+        <Border
+            Grid.Row="1"
+            Background="{ThemeResource DividerStrokeColorDefaultBrush}"
+            IsHitTestVisible="False" />
+
+        <Grid
+            x:Name="ContentHost"
+            Grid.Row="2"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" />
+    </Grid>
+</UserControl>

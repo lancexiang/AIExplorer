@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="xterm.css" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #1e1e1e;
+    }
+    #term {
+      width: 100%;
+      height: 100%;
+      padding: 4px 6px 2px;
+      box-sizing: border-box;
+    }
+    .xterm, .xterm-viewport { height: 100% !important; }
+  </style>
+</head>
+<body>
+  <div id="term"></div>
+  <script src="xterm.js"></script>
+  <script src="xterm-addon-fit.js"></script>
+  <script>
+    const term = new Terminal({
+      cursorBlink: true,
+      fontFamily: 'Consolas, Cascadia Mono, Courier New, monospace',
+      fontSize: 13,
+      theme: {
+        background: '#1e1e1e',
+        foreground: '#d4d4d4',
+        cursor: '#aeafad',
+        selectionBackground: '#264f78'
+      },
+      allowProposedApi: true,
+      convertEol: false,
+      windowsMode: true,
+      rightClickSelectsWord: false
+    });
+    const fitAddon = new FitAddon.FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(document.getElementById('term'));
+    window.fitAddon = fitAddon;
+    window.term = term;
+
+    let pasteLockUntil = 0;
+
+    function post(msg) {
+      try {
+        chrome.webview.postMessage(msg);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function requestPasteOnce() {
+      const now = Date.now();
+      if (now < pasteLockUntil) {
+        return;
+      }
+      pasteLockUntil = now + 120;
+      post({ type: 'paste-request' });
+    }
+
+    function notifyResize() {
+      try {
+        fitAddon.fit();
+        post({ type: 'resize', cols: term.cols, rows: term.rows });
+      } catch (e) {}
+    }
+
+    function isMod(ev) {
+      return ev.ctrlKey && !ev.altKey && !ev.metaKey;
+    }
+
+    // 只在 keydown 请求粘贴；并挡住 xterm 默认处理
+    term.attachCustomKeyEventHandler(ev => {
+      if (ev.type !== 'keydown') {
+        return true;
+      }
+
+      const key = (ev.key || '').toLowerCase();
+
+      if (isMod(ev) && (key === 'c' || key === 'insert') && term.hasSelection()) {
+        post({ type: 'copy', text: term.getSelection() });
+        return false;
+      }
+
+      if ((isMod(ev) && key === 'v') || (ev.shiftKey && !ev.ctrlKey && !ev.altKey && key === 'insert')) {
+        requestPasteOnce();
+        return false;
+      }
+
+      if (isMod(ev) && key === 'a') {
+        term.selectAll();
+        return false;
+      }
+
+      return true;
+    });
+
+    // 浏览器原生 paste 会再写一遍 → 双粘贴；一律拦截，改走宿主
+    document.addEventListener('paste', ev => {
+      const t = ev.target;
+      if (t && (t === term.textarea || (term.element && term.element.contains(t)))) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        // keydown 已 requestPasteOnce 时这里只挡默认，不再二次请求
+        if (Date.now() >= pasteLockUntil) {
+          requestPasteOnce();
+        }
+      }
+    }, true);
+
+    document.getElementById('term').addEventListener('contextmenu', ev => {
+      ev.preventDefault();
+      if (term.hasSelection()) {
+        post({ type: 'copy', text: term.getSelection() });
+      } else {
+        requestPasteOnce();
+      }
+    });
+
+    term.onData(data => post({ type: 'input', data }));
+    window.addEventListener('resize', () => notifyResize());
+
+    window.termWrite = function (text) {
+      term.write(text);
+    };
+
+    window.termWriteBase64 = function (b64) {
+      try {
+        const bin = atob(b64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        term.write(bytes);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    window.termClear = function () {
+      term.clear();
+    };
+
+    window.termFocus = function () {
+      term.focus();
+    };
+
+    setTimeout(notifyResize, 50);
+    setTimeout(notifyResize, 200);
+    post({ type: 'ready' });
+  </script>
+</body>
+</html>

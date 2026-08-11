@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+    x:Class="AIExplorer_App.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:AIExplorer_App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" xmlns:converters="using:AIExplorer_App.Converters" />
+            <converters:NullIfEmptyStringConverter x:Key="NullIfEmptyStringConverter" xmlns:converters="using:AIExplorer_App.Converters" />
+            <converters:ColorKeyToBrushConverter x:Key="ColorKeyToBrushConverter" xmlns:converters="using:AIExplorer_App.Converters" />
+
+            <!-- Allen/Fluent 密度：紧凑工具钮、列表行 -->
+            <x:Double x:Key="AppChromeHeight">34</x:Double>
+            <Thickness x:Key="AppChromePadding">8,3,8,3</Thickness>
+            <x:Double x:Key="AppListRowMinHeight">26</x:Double>
+
+            <SolidColorBrush x:Key="AppSidebarBackgroundBrush" Color="#0FFFFFFF" />
+            <SolidColorBrush x:Key="AppChromeBackgroundBrush" Color="#08000000" />
+            <SolidColorBrush x:Key="AppAccentBrush" Color="#0078D4" />
+
+            <Style x:Key="AppToolButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Padding" Value="7,3" />
+                <Setter Property="MinWidth" Value="30" />
+                <Setter Property="MinHeight" Value="26" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="CornerRadius" Value="4" />
+            </Style>
+
+            <Style x:Key="AppFavoriteFlyoutPresenterStyle" TargetType="MenuFlyoutPresenter">
+                <Setter Property="MaxHeight" Value="480" />
+            </Style>
+
+            <Style TargetType="TabViewItem">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                <Setter Property="MinHeight" Value="36" />
+                <Setter Property="Padding" Value="0" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

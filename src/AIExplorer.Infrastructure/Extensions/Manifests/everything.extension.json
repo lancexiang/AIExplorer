@@ -1,0 +1,16 @@
+{
+  "id": "everything",
+  "displayName": "Everything 搜索",
+  "kind": "Native",
+  "capabilities": ["Search"],
+  "defaultEnabled": true,
+  "firstBatch": true,
+  "requires": {
+    "dll": "Everything64.dll",
+    "service": "Everything"
+  },
+  "settings": {
+    "maxResults": { "type": "number", "default": 200 }
+  },
+  "notes": "第一批必接。未检测到 Everything 运行时 IsAvailable=false，UI 应降级隐藏或提示安装。"
+}
