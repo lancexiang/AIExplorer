@@ -9,7 +9,7 @@ internal sealed class InstallEngine
     public const string AppName = "AIExplorer";
     public const string DisplayName = "AI Explorer";
     public const string Publisher = "AIExplorer";
-    public const string ProductVersion = "1.0.0";
+    public const string ProductVersion = "1.0.1";
     public const string UninstallRegKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\AIExplorer";
 
     private static readonly Version MinWarVersion = new(6000, 242, 101, 0);
@@ -95,6 +95,9 @@ internal sealed class InstallEngine
 
         Step(65, "正在复制私有 .NET 运行时…");
         CopyDirectory(dotnetSrc, Path.Combine(installDir, "dotnet"));
+
+        Step(72, "正在复制 Windows App Runtime 安装器（供启动自愈）…");
+        CopyWarRepairFiles(warDir, warMsixDir, installDir);
 
         Step(75, "正在写入启动器…");
         WriteLauncher(installDir);
@@ -251,6 +254,9 @@ internal sealed class InstallEngine
             throw new FileNotFoundException("找不到 AIExplorer.App.exe", exe);
         }
 
+        // 启动前再保一次 WAR，避免用户绕过 Setup 或运行时被卸载后弹系统对话框
+        TryEnsureWarFromInstallDir(installDir);
+
         // Set DOTNET_ROOT in-process — no cmd/console flash
         var psi = new ProcessStartInfo
         {
@@ -261,6 +267,24 @@ internal sealed class InstallEngine
         psi.Environment["DOTNET_ROOT"] = Path.Combine(installDir, "dotnet");
         psi.Environment["DOTNET_MULTILEVEL_LOOKUP"] = "0";
         Process.Start(psi);
+    }
+
+    private static void TryEnsureWarFromInstallDir(string installDir)
+    {
+        try
+        {
+            var engine = new InstallEngine();
+            var warInstaller = Path.Combine(installDir, "runtimes", "WindowsAppRuntimeInstall-x64.exe");
+            var warMsixDir = Path.Combine(installDir, "runtimes", "war-msix");
+            if (File.Exists(warInstaller) || Directory.Exists(warMsixDir))
+            {
+                engine.EnsureWindowsAppRuntime(warInstaller, warMsixDir);
+            }
+        }
+        catch
+        {
+            // Launch 仍继续；若 WAR 缺失会由系统弹窗引导
+        }
     }
 
     private void RegisterUninstall(string installDir)
@@ -363,6 +387,17 @@ internal sealed class InstallEngine
                 return;
             }
 
+            // 当前用户安装失败时，尝试提权做整机部署（UAC 可能弹一次）
+            Log("Per-user install insufficient — retry elevated…");
+            var elevated = RunElevated(warInstaller, "--quiet --force", TimeSpan.FromMinutes(5));
+            Log($"WindowsAppRuntimeInstall elevated exit=0x{elevated:X8} ({elevated})");
+            Thread.Sleep(1500);
+            if (IsWarReady(out var afterElevated))
+            {
+                Log("After elevated installer: " + afterElevated);
+                return;
+            }
+
             Log("Official installer did not register Main — force MSIX…");
         }
 
@@ -390,10 +425,29 @@ internal sealed class InstallEngine
         if (!IsWarReady(out var finalStatus))
         {
             throw new InvalidOperationException(
-                "无法安装 Windows App Runtime 1.6（缺 Main 包）。\n\n" + finalStatus);
+                "无法安装 Windows App Runtime 1.6（缺 Main 包）。\n\n" + finalStatus +
+                "\n\n请以管理员身份重新运行 AIExplorer-Setup.exe，或手动运行 runtimes\\WindowsAppRuntimeInstall-x64.exe。");
         }
 
         Log("After MSIX: " + finalStatus);
+    }
+
+    private static void CopyWarRepairFiles(string warDir, string warMsixDir, string installDir)
+    {
+        var destWar = Path.Combine(installDir, "runtimes");
+        Directory.CreateDirectory(destWar);
+
+        var installer = Path.Combine(warDir, "WindowsAppRuntimeInstall-x64.exe");
+        if (File.Exists(installer))
+        {
+            File.Copy(installer, Path.Combine(destWar, "WindowsAppRuntimeInstall-x64.exe"), overwrite: true);
+            UnblockFile(Path.Combine(destWar, "WindowsAppRuntimeInstall-x64.exe"));
+        }
+
+        if (Directory.Exists(warMsixDir))
+        {
+            CopyDirectory(warMsixDir, Path.Combine(destWar, "war-msix"));
+        }
     }
 
     private (int ExitCode, string StdOut, string StdErr) AddAppxPackage(string path)
@@ -480,14 +534,52 @@ if (($fwOk.Count -gt 0) -and ($mainOk.Count -gt 0)) {{ exit 0 }} else {{ exit 2 
         return p.ExitCode;
     }
 
+    private int RunElevated(string fileName, string arguments, TimeSpan timeout)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = fileName,
+                Arguments = arguments,
+                UseShellExecute = true,
+                Verb = "runas",
+                WindowStyle = ProcessWindowStyle.Hidden,
+            };
+            using var p = Process.Start(psi);
+            if (p is null)
+            {
+                Log("elevated start returned null (UAC canceled?)");
+                return -1;
+            }
+
+            if (!p.WaitForExit((int)timeout.TotalMilliseconds))
+            {
+                try { p.Kill(); } catch { /* ignore */ }
+                throw new TimeoutException(fileName + " elevated timed out");
+            }
+
+            return p.ExitCode;
+        }
+        catch (Exception ex)
+        {
+            Log("elevated failed: " + ex.Message);
+            return -1;
+        }
+    }
+
     private static void WriteLauncher(string dest)
     {
-        // VBS: no console window flash (unlike .cmd)
+        // VBS: 启动前静默确保 WAR，再设 DOTNET_ROOT 启动 App（无控制台闪窗）
         var vbs = string.Join("\r\n", new[]
         {
             "Set sh = CreateObject(\"WScript.Shell\")",
             "Set fso = CreateObject(\"Scripting.FileSystemObject\")",
             "root = fso.GetParentFolderName(WScript.ScriptFullName)",
+            "war = root & \"\\runtimes\\WindowsAppRuntimeInstall-x64.exe\"",
+            "If fso.FileExists(war) Then",
+            "  sh.Run \"\"\"\" & war & \"\"\" --quiet --force\", 0, True",
+            "End If",
             "Set env = sh.Environment(\"Process\")",
             "env(\"DOTNET_ROOT\") = root & \"\\dotnet\"",
             "env(\"DOTNET_MULTILEVEL_LOOKUP\") = \"0\"",
@@ -502,6 +594,9 @@ if (($fwOk.Count -gt 0) -and ($mainOk.Count -gt 0)) {{ exit 0 }} else {{ exit 2 
             "@echo off",
             "setlocal",
             "set \"ROOT=%~dp0\"",
+            "if exist \"%ROOT%runtimes\\WindowsAppRuntimeInstall-x64.exe\" (",
+            "  \"%ROOT%runtimes\\WindowsAppRuntimeInstall-x64.exe\" --quiet --force",
+            ")",
             "set \"DOTNET_ROOT=%ROOT%dotnet\"",
             "set \"DOTNET_MULTILEVEL_LOOKUP=0\"",
             "start \"\" \"%ROOT%AIExplorer.App.exe\"",

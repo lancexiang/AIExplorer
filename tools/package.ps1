@@ -290,22 +290,30 @@ $readmeLines = @(
     "AIExplorer setup package (Windows 11 / 10 x64)",
     "==============================================",
     "",
-    "INSTALL",
-    "-------",
+    "INSTALL (required)",
+    "------------------",
     "1. Unzip the WHOLE folder",
-    "2. Double-click AIExplorer-Setup.exe (wizard: path / progress / finish)",
-    "3. Optional: /silent for unattended install",
+    "2. Double-click AIExplorer-Setup.exe",
+    "3. Finish the wizard (it installs Windows App Runtime 1.6 automatically)",
+    "",
+    "Do NOT double-click app\AIExplorer.App.exe before Setup.",
+    "That will show 'requires Windows App Runtime 1.6' and skip the bundled installer.",
     "",
     "UNINSTALL",
     "---------",
     "- Settings -> Apps -> AI Explorer",
     "- Or run Uninstall.exe in the install folder",
     "",
-    "Do NOT launch app\AIExplorer.App.exe before Setup.",
-    "",
     "Layout: AIExplorer-Setup.exe, app\, dotnet\, runtimes\"
 )
 Set-Content -Path (Join-Path $publishDir "README-Install.txt") -Value ($readmeLines -join "`r`n") -Encoding ASCII
+
+[System.IO.File]::WriteAllText(
+    (Join-Path $publishDir "PLEASE-RUN-Setup-FIRST.txt"),
+    ("Please double-click AIExplorer-Setup.exe first.`r`n" +
+     "Do NOT run app\AIExplorer.App.exe before Setup, or Windows will prompt for App Runtime 1.6`r`n" +
+     "and skip the Runtime installer already bundled in this package.`r`n"),
+    [System.Text.UTF8Encoding]::new($false))
 
 $fileCount = (Get-ChildItem $publishDir -Recurse -File).Count
 $sizeMb = [math]::Round(((Get-ChildItem $publishDir -Recurse -File | Measure-Object Length -Sum).Sum / 1MB), 1)
