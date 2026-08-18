@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>替换配图 · AI Explorer</title>
+  <link rel="icon" href="favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root { --ink:#1d1d1f; --mute:#6e6e73; --snow:#f5f5f7; --blue:#0071e3; }
+    body {
+      margin: 0; font-family: Urbanist, "PingFang SC", "Noto Sans SC", sans-serif;
+      background: var(--snow); color: var(--ink); line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    main { width: min(720px, calc(100% - 40px)); margin: 48px auto 80px; }
+    a { color: var(--blue); text-decoration: none; }
+    h1 { font-size: 32px; letter-spacing: -.03em; font-weight: 600; }
+    h2 { font-size: 20px; margin-top: 2em; font-weight: 600; }
+    p, li { color: var(--mute); font-weight: 400; }
+    code, pre {
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+      font-size: 13px; background: #ececee; border-radius: 6px;
+    }
+    code { padding: 1px 6px; color: var(--ink); }
+    pre { padding: 14px 16px; overflow: auto; color: var(--ink); }
+    table { width: 100%; border-collapse: collapse; margin: 1em 0 1.5em; font-size: 14px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,.08); }
+    th { color: var(--ink); font-weight: 600; }
+    .back { font-size: 14px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="back"><a href="./">← AI Explorer</a></p>
+    <h1>替换产品配图</h1>
+    <p>官网配图都在仓库 <code>docs/media/</code>。用同名文件覆盖即可，不必改 HTML。推送到 <code>main</code> 后，GitHub Pages 一两分钟会更新。</p>
+
+    <h2>1. 文件对照</h2>
+    <table>
+      <thead>
+        <tr><th>文件</th><th>出现位置</th><th>建议拍什么</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>media/hero.png</code></td><td>首屏大图</td><td>最大化后的干净主界面，双栏、无弹窗、无录制控件</td></tr>
+        <tr><td><code>media/ui.png</code></td><td>界面清爽</td><td>列表 + 精美后缀图标 + 左侧盘符，可慢扫停留</td></tr>
+        <tr><td><code>media/copy.png</code></td><td>拷贝引擎</td><td>任务面板展开，能看到队列/进度</td></tr>
+        <tr><td><code>media/fav.png</code></td><td>收藏夹</td><td>顶栏分组展开（如 Acme / Nova）</td></tr>
+        <tr><td><code>media/split.png</code></td><td>无限分栏</td><td>左右或上下分栏，可带置顶/颜色</td></tr>
+        <tr><td><code>media/quick.png</code></td><td>快捷栏</td><td>选中文件后的浮动快捷操作条</td></tr>
+        <tr><td><code>media/preview.png</code></td><td>预览</td><td>Markdown 预览/编辑，不要录制手册原文</td></tr>
+        <tr><td><code>media/icon.png</code></td><td>导航 Logo</td><td>应用图标，建议 192×192 PNG</td></tr>
+      </tbody>
+    </table>
+
+    <h2>2. 规格</h2>
+    <ul>
+      <li>格式：<code>PNG</code> 或把扩展名仍存成 <code>.png</code>（JPG 内容也可以，但文件名保持上表）</li>
+      <li>首屏 <code>hero.png</code>：宽 ≥ 2400，高 ≥ 1200；其余宽 ≥ 1920，高 ≥ 1080</li>
+      <li>内容：只露产品窗口，避开任务栏、录屏悬浮条、个人路径</li>
+      <li>单张尽量 &lt; 2.5 MB，全页才加载得快</li>
+    </ul>
+
+    <h2>3. 替换步骤</h2>
+    <pre>1. 全屏录或截：Win+Shift+S，或把视频导出一帧
+2. 用画图 / Photoshop 裁成 16:9 或超宽（hero 可用超宽）
+3. 覆盖 docs/media/ 里对应文件名（不要改名）
+4. 提交并推送到 main：
+
+git add docs/media/*.png
+git commit -m "docs: update product screenshots"
+git push origin main</pre>
+    <p>网页代码不用动。若一定要换文件名，再改 <code>docs/index.html</code> 里对应的 <code>src="media/....png"</code>。</p>
+
+    <h2>4. 可选：本机预览</h2>
+    <pre>cd docs
+python -m http.server 8080
+# 浏览器打开 http://localhost:8080</pre>
+  </main>
+</body>
+</html>

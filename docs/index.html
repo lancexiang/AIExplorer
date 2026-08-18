@@ -14,9 +14,6 @@
       --ink: #1d1d1f;
       --mute: #6e6e73;
       --snow: #f5f5f7;
-      --paper: #ffffff;
-      --void: #000000;
-      --cloud: #fbfbfd;
       --blue: #0071e3;
       --blue-h: #0077ed;
       --line: rgba(0,0,0,.08);
@@ -36,7 +33,7 @@
     .nav {
       position: sticky; top: 0; z-index: 20;
       backdrop-filter: saturate(180%) blur(20px);
-      background: rgba(251,251,253,.72);
+      background: rgba(245,245,247,.78);
       border-bottom: 1px solid var(--line);
     }
     .nav-inner {
@@ -58,7 +55,7 @@
     .nav-cta:hover { background: var(--blue-h); }
 
     .hero {
-      background: var(--cloud);
+      background: var(--snow);
       text-align: center;
       padding: 72px 20px 0;
     }
@@ -98,9 +95,12 @@
       object-position: 38% 48%;
     }
 
-    .band { padding: 92px 0 0; overflow: hidden; }
-    .band.dark { background: var(--void); color: var(--snow); }
-    .band.light { background: var(--snow); color: var(--ink); }
+    .band {
+      background: var(--snow);
+      color: var(--ink);
+      padding: 92px 0 0;
+      overflow: hidden;
+    }
     .copy {
       width: min(820px, calc(100% - 40px));
       margin: 0 auto;
@@ -119,11 +119,7 @@
       line-height: 1.45;
       color: var(--mute);
     }
-    .band.dark .copy p { color: #a1a1a6; }
-    .shot {
-      margin-top: 48px;
-      width: 100%;
-    }
+    .shot { margin-top: 48px; width: 100%; }
     .shot img {
       width: 100%;
       height: min(68vh, 760px);
@@ -132,8 +128,8 @@
     }
 
     .finale {
-      background: var(--void);
-      color: var(--snow);
+      background: var(--snow);
+      color: var(--ink);
       text-align: center;
       padding: 120px 24px 100px;
     }
@@ -148,7 +144,7 @@
       max-width: 28em;
       font-size: 21px;
       font-weight: 300;
-      color: #a1a1a6;
+      color: var(--mute);
     }
     .finale .cta {
       display: inline-flex; margin-top: 32px;
@@ -160,7 +156,7 @@
     .finale .note {
       margin-top: 16px;
       font-size: 13px;
-      color: #6e6e73;
+      color: var(--mute);
       font-weight: 300;
     }
 
@@ -211,15 +207,15 @@
     </div>
   </header>
 
-  <section class="band light">
+  <section class="band">
     <div class="copy">
       <h2>界面清爽。信息一目了然。</h2>
       <p>基于 WinUI 打造。颜色层次分明，各类型文件都有精美后缀图标，左侧快捷盘符一键直达。</p>
     </div>
-    <div class="shot"><img src="media/hero.png" alt="WinUI 界面与快捷盘符" /></div>
+    <div class="shot"><img src="media/ui.png" alt="WinUI 界面与快捷盘符" /></div>
   </section>
 
-  <section class="band dark">
+  <section class="band">
     <div class="copy">
       <h2>自研拷贝引擎。<br />大文件，稳得住。</h2>
       <p>十兆、百兆、上千兆放进队列。右下角收起展开任务面板，进度和历史随时可查。</p>
@@ -227,7 +223,7 @@
     <div class="shot"><img src="media/copy.png" alt="拷贝任务队列" /></div>
   </section>
 
-  <section class="band light">
+  <section class="band">
     <div class="copy">
       <h2>按项目无限嵌套。<br />一键打开全部。</h2>
       <p>点开分组，打开此分组下全部文件夹。开工，不用再找路。</p>
@@ -235,7 +231,7 @@
     <div class="shot"><img src="media/fav.png" alt="嵌套收藏夹" /></div>
   </section>
 
-  <section class="band dark">
+  <section class="band">
     <div class="copy">
       <h2>水平、垂直，无限分栏。</h2>
       <p>为大屏而生。文件还能置顶、上色、加备注，重要的一眼就能看见。</p>
@@ -243,7 +239,7 @@
     <div class="shot"><img src="media/split.png" alt="多窗格分栏" /></div>
   </section>
 
-  <section class="band light">
+  <section class="band">
     <div class="copy">
       <h2>点选即出。常用动作都在手边。</h2>
       <p>选中文件出现浮动快捷栏。复制、粘贴、路径、标记置顶，鼠标悬停停一下即可。</p>
@@ -251,7 +247,7 @@
     <div class="shot"><img src="media/quick.png" alt="浮动快捷栏" /></div>
   </section>
 
-  <section class="band dark">
+  <section class="band">
     <div class="copy">
       <h2>自研预览。边看边改。</h2>
       <p>Markdown、配置文件直接编辑保存。少开一堆软件。</p>
@@ -269,6 +265,7 @@
   <footer>
     <a href="https://github.com/lancexiang/AIExplorer/releases">Releases</a>
     · 非开源商业软件
+    · <a href="replace-images.html">如何替换配图</a>
   </footer>
 </body>
 </html>
