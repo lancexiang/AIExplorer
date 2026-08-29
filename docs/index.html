@@ -54,6 +54,19 @@
       padding: 6px 14px; border-radius: 980px;
     }
     .nav-cta:hover { background: var(--blue-h); }
+    .nav-links {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .nav-qq {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500; color: var(--mute);
+      letter-spacing: -.01em; white-space: nowrap;
+    }
+    .nav-qq svg { flex-shrink: 0; }
+    .nav-qq strong { color: var(--ink); font-weight: 600; }
+    @media (max-width: 560px) {
+      .nav-qq span.nav-qq-label { display: none; }
+    }
 
     .hero {
       background: var(--snow);
@@ -211,7 +224,18 @@
         <img src="media/icon.png" alt="" />
         AI Explorer
       </a>
-      <a class="nav-cta" href="https://github.com/lancexiang/AIExplorer/releases/latest">下载</a>
+      <div class="nav-links">
+        <span class="nav-qq" title="QQ 交流群">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="12" fill="#12B7F5"/>
+            <path fill="#fff" d="M12 5.2c-2.2 0-4 1.5-4 3.9 0 .6.1 1.2.3 1.7-.9 1-.9 2.1-.4 3 .3.5.2 1.1-.2 1.5-.3.3-.1.7.3.7.5 0 1.1-.2 1.6-.5.5.2 1.1.4 1.7.4h.1c.6 0 1.2-.1 1.7-.4.5.3 1.1.5 1.6.5.4 0 .6-.4.3-.7-.4-.4-.5-1-.2-1.5.5-.9.5-2-.4-3 .2-.5.3-1.1.3-1.7 0-2.4-1.8-3.9-4-3.9z"/>
+          </svg>
+          <span class="nav-qq-label">交流群</span>
+          <strong>1106799023</strong>
+        </span>
+        <a href="buy.html" style="font-size:12px;font-weight:600;color:var(--ink);">购买授权</a>
+        <a class="nav-cta" href="https://github.com/lancexiang/AIExplorer/releases/latest">下载</a>
+      </div>
     </div>
   </nav>
 
@@ -219,6 +243,7 @@
     <h1 class="hero-copy">AI Explorer</h1>
     <p class="line hero-copy">把文件管理，做成生产力。</p>
     <a class="cta hero-copy" href="https://github.com/lancexiang/AIExplorer/releases/latest">开始试用</a>
+    <a class="cta hero-copy" href="buy.html" style="margin-left:10px;background:transparent;color:var(--blue);box-shadow:inset 0 0 0 1.5px var(--blue);">购买一年授权</a>
     <div class="hero-visual">
       <img src="media/hero.png" alt="AI Explorer 主界面" width="3840" height="2100" />
     </div>
@@ -276,11 +301,15 @@
     <h2>持续打磨。<br />更好整理文件。</h2>
     <p>欢迎试用 AI Explorer，一起把文件管理做回生产力工具。</p>
     <a class="cta" href="https://github.com/lancexiang/AIExplorer/releases/latest">开始试用</a>
+    <a class="cta" href="buy.html" style="margin-left:10px;background:transparent;color:var(--blue);box-shadow:inset 0 0 0 1.5px var(--blue);">购买一年授权</a>
     <p class="note">商业闭源版本 · 7 天试用 · Windows 10 / 11 x64</p>
+    <p class="note" style="margin-top:10px;">QQ 交流群：<strong style="color:var(--ink);font-weight:600;">1106799023</strong></p>
   </section>
 
   <footer>
     <a href="https://github.com/lancexiang/AIExplorer/releases">Releases</a>
+    · <a href="buy.html">购买授权</a>
+    · QQ 群 1106799023
     · 非开源商业软件
     · <a href="replace-images.html">如何替换配图</a>
   </footer>

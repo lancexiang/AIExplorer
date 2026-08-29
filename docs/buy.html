@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>购买一年授权 · AI Explorer</title>
+  <meta name="description" content="填写机器码，通过 Stripe 支付后自动获取一年授权许可证。" />
+  <link rel="icon" href="favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1d1d1f;
+      --mute: #6e6e73;
+      --snow: #f5f5f7;
+      --blue: #0071e3;
+      --blue-h: #0077ed;
+      --line: rgba(0,0,0,.08);
+      --ok: #1b7f4e;
+      --err: #c41e3a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Urbanist, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+      color: var(--ink);
+      background: var(--snow);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    .nav {
+      position: sticky; top: 0; z-index: 40;
+      backdrop-filter: saturate(180%) blur(20px);
+      background: rgba(245,245,247,.78);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner {
+      width: min(720px, calc(100% - 40px));
+      margin: 0 auto;
+      height: 48px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 600; font-size: 15px; letter-spacing: -.02em;
+    }
+    .logo img { width: 28px; height: 28px; display: block; }
+    .nav-cta {
+      font-size: 12px; font-weight: 600;
+      color: #fff; background: var(--blue);
+      padding: 6px 14px; border-radius: 980px;
+    }
+    .wrap {
+      width: min(560px, calc(100% - 40px));
+      margin: 56px auto 80px;
+    }
+    h1 {
+      font-size: clamp(32px, 6vw, 44px);
+      font-weight: 600;
+      letter-spacing: -.04em;
+      line-height: 1.1;
+    }
+    .sub {
+      margin-top: 12px;
+      color: var(--mute);
+      font-size: 17px;
+      font-weight: 300;
+      line-height: 1.45;
+    }
+    .price {
+      margin-top: 28px;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -.03em;
+    }
+    .price span { font-size: 15px; font-weight: 500; color: var(--mute); margin-left: 8px; }
+    .panel {
+      margin-top: 28px;
+      padding: 22px 0 0;
+      border-top: 1px solid var(--line);
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    input[type="text"], input[type="email"] {
+      width: 100%;
+      font: inherit;
+      font-size: 15px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      outline: none;
+    }
+    input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,113,227,.18); }
+    .hint {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--mute);
+      line-height: 1.4;
+    }
+    .field + .field { margin-top: 18px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-top: 22px;
+      width: 100%;
+      border: 0; cursor: pointer;
+      color: #fff; background: var(--blue);
+      font: inherit; font-size: 17px; font-weight: 600;
+      padding: 14px 22px; border-radius: 980px;
+    }
+    .btn:hover { background: var(--blue-h); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .msg {
+      margin-top: 16px;
+      font-size: 14px;
+      line-height: 1.45;
+      min-height: 1.2em;
+    }
+    .msg.err { color: var(--err); }
+    .msg.ok { color: var(--ok); }
+    .success-box {
+      margin-top: 20px;
+      display: none;
+    }
+    .success-box.show { display: block; }
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      resize: vertical;
+    }
+    .row {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .btn-secondary {
+      display: inline-flex;
+      border: 0; cursor: pointer;
+      background: #e8e8ed; color: var(--ink);
+      font: inherit; font-size: 14px; font-weight: 600;
+      padding: 10px 16px; border-radius: 980px;
+    }
+    .steps {
+      margin-top: 36px;
+      color: var(--mute);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .steps strong { color: var(--ink); font-weight: 600; }
+    footer {
+      text-align: center;
+      color: var(--mute);
+      font-size: 12px;
+      padding: 0 20px 40px;
+    }
+    footer a { color: var(--blue); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="logo" href="./">
+        <img src="media/icon.png" alt="" />
+        AI Explorer
+      </a>
+      <a class="nav-cta" href="https://github.com/lancexiang/AIExplorer/releases/latest">下载</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <h1>购买一年授权</h1>
+    <p class="sub">固定价格。支付前填写本机机器码，付款成功后自动生成一年期 <code>.lic</code>（从本机首次激活起算），可在本页复制或下载。</p>
+    <p class="price" id="priceLabel">¥29<span>/ 年 · 按机器绑定</span></p>
+
+    <section id="checkoutPanel" class="panel">
+      <div class="field">
+        <label for="machineId">机器码</label>
+        <input id="machineId" type="text" autocomplete="off" spellcheck="false"
+          placeholder="32 位十六进制，或粘贴 AIExplorer-MachineId:…" />
+        <p class="hint">应用内：帮助 → 许可证状态 → 复制机器码。也可在安装向导激活页复制。</p>
+      </div>
+      <button class="btn" id="payBtn" type="button">前往 Stripe 支付</button>
+      <p class="msg" id="checkoutMsg" role="status"></p>
+    </section>
+
+    <section id="successPanel" class="panel success-box" aria-live="polite">
+      <p class="msg ok" id="successMsg">支付成功。正在签发许可证…</p>
+      <label for="licenseText">许可证内容（.lic）</label>
+      <textarea id="licenseText" readonly></textarea>
+      <div class="row">
+        <button class="btn-secondary" id="copyBtn" type="button">复制全部</button>
+        <button class="btn-secondary" id="downloadBtn" type="button">下载 .lic 文件</button>
+      </div>
+      <p class="steps">
+        <strong>激活：</strong>打开 AI Explorer → 帮助 → 许可证状态 → 激活… → 粘贴上方内容或导入下载的文件。
+      </p>
+    </section>
+
+    <p class="steps">
+      支付由 Stripe 处理。本页只提交机器码，不会保存银行卡信息。
+      若支付后未自动显示许可证，请保留浏览器地址栏中的 <code>session_id</code> 联系作者补发。
+    </p>
+  </main>
+
+  <footer>
+    <a href="./">返回首页</a>
+    ·
+    <a href="https://github.com/lancexiang/AIExplorer/releases/latest">下载试用</a>
+  </footer>
+
+  <script>
+    // Deploy Worker 后改成你的 API 根地址（不要末尾斜杠）
+    window.AIEXPLORER_LICENSE_API = "https://aiexplorer-license-api.xiangluo1019.workers.dev";
+    window.AIEXPLORER_PRICE_LABEL = "¥29";
+  </script>
+  <script>
+    (function () {
+      var api = (window.AIEXPLORER_LICENSE_API || "").replace(/\/$/, "");
+      var priceLabel = document.getElementById("priceLabel");
+      if (window.AIEXPLORER_PRICE_LABEL) {
+        priceLabel.innerHTML = window.AIEXPLORER_PRICE_LABEL + "<span>/ 年 · 按机器绑定</span>";
+      }
+
+      var params = new URLSearchParams(location.search);
+      var sessionId = params.get("session_id");
+      var cancelled = params.get("cancelled");
+
+      var checkoutPanel = document.getElementById("checkoutPanel");
+      var successPanel = document.getElementById("successPanel");
+      var checkoutMsg = document.getElementById("checkoutMsg");
+      var successMsg = document.getElementById("successMsg");
+      var licenseText = document.getElementById("licenseText");
+      var payBtn = document.getElementById("payBtn");
+      var machineInput = document.getElementById("machineId");
+
+      function setCheckoutError(text) {
+        checkoutMsg.className = "msg err";
+        checkoutMsg.textContent = text || "";
+      }
+
+      function apiConfigured() {
+        if (!api || api.indexOf("YOUR_SUBDOMAIN") !== -1) {
+          setCheckoutError("购买 API 尚未配置：请先部署 tools/license-api Worker，并修改本页 AIEXPLORER_LICENSE_API。");
+          payBtn.disabled = true;
+          return false;
+        }
+        return true;
+      }
+
+      if (cancelled) {
+        setCheckoutError("已取消支付。如需购买请重新填写机器码。");
+      }
+
+      if (sessionId) {
+        checkoutPanel.style.display = "none";
+        successPanel.classList.add("show");
+        fulfill(sessionId);
+      }
+
+      payBtn.addEventListener("click", function () {
+        if (!apiConfigured()) return;
+        var machineId = (machineInput.value || "").trim();
+        if (!machineId) {
+          setCheckoutError("请先填写机器码。");
+          machineInput.focus();
+          return;
+        }
+        payBtn.disabled = true;
+        checkoutMsg.className = "msg";
+        checkoutMsg.textContent = "正在创建支付会话…";
+        fetch(api + "/api/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ machineId: machineId }),
+        })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+          .then(function (res) {
+            if (!res.ok || !res.j.url) {
+              throw new Error((res.j && res.j.error) || "创建支付失败");
+            }
+            location.href = res.j.url;
+          })
+          .catch(function (e) {
+            payBtn.disabled = false;
+            setCheckoutError(e.message || String(e));
+          });
+      });
+
+      function fulfill(id) {
+        if (!api || api.indexOf("YOUR_SUBDOMAIN") !== -1) {
+          successMsg.className = "msg err";
+          successMsg.textContent = "API 未配置，无法自动签发。请联系作者并提供 session_id=" + id;
+          return;
+        }
+        fetch(api + "/api/license?session_id=" + encodeURIComponent(id))
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+          .then(function (res) {
+            if (!res.ok || !res.j.license) {
+              throw new Error((res.j && res.j.error) || "签发失败");
+            }
+            successMsg.className = "msg ok";
+            successMsg.textContent = "支付成功。已签发一年授权（机器码 " + res.j.machineId + "，从本机首次激活起算）。请复制或下载下方许可证并在应用内激活。";
+            licenseText.value = res.j.license;
+          })
+          .catch(function (e) {
+            successMsg.className = "msg err";
+            successMsg.textContent = (e.message || String(e)) + "（session_id=" + id + "）";
+          });
+      }
+
+      document.getElementById("copyBtn").addEventListener("click", function () {
+        if (!licenseText.value) return;
+        navigator.clipboard.writeText(licenseText.value).then(function () {
+          successMsg.className = "msg ok";
+          successMsg.textContent = "已复制到剪贴板。请到应用内激活。";
+        });
+      });
+
+      document.getElementById("downloadBtn").addEventListener("click", function () {
+        if (!licenseText.value) return;
+        var blob = new Blob([licenseText.value], { type: "application/json" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "AIExplorer-license.lic";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+
+      apiConfigured();
+    })();
+  </script>
+</body>
+</html>
