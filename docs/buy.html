@@ -75,6 +75,21 @@
       letter-spacing: -.03em;
     }
     .price span { font-size: 15px; font-weight: 500; color: var(--mute); margin-left: 8px; }
+    .price-was {
+      margin-left: 10px;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--mute);
+      text-decoration: line-through;
+    }
+    .price-note {
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--mute);
+      line-height: 1.5;
+    }
+    .price-note strong { color: var(--ink); font-weight: 600; }
     .panel {
       margin-top: 28px;
       padding: 22px 0 0;
@@ -181,7 +196,8 @@
   <main class="wrap">
     <h1>购买一年授权</h1>
     <p class="sub">固定价格。支付前填写本机机器码，付款成功后自动生成一年期 <code>.lic</code>（从本机首次激活起算），可在本页复制或下载。</p>
-    <p class="price" id="priceLabel">¥29<span>/ 年 · 按机器绑定</span></p>
+    <p class="price" id="priceLabel">¥35<span>/ 年 · 按机器绑定</span><span class="price-was">原价 ¥29</span></p>
+    <p class="price-note">因 Stripe 国际支付手续费较高，在线价调整为 ¥35。更推荐加入 QQ 群 <strong>1106799023</strong>，联系作者个人收款（按原价 ¥29）。</p>
 
     <section id="checkoutPanel" class="panel">
       <div class="field">
@@ -190,7 +206,7 @@
           placeholder="32 位十六进制，或粘贴 AIExplorer-MachineId:…" />
         <p class="hint">应用内：帮助 → 许可证状态 → 复制机器码。也可在安装向导激活页复制。</p>
       </div>
-      <button class="btn" id="payBtn" type="button">前往 Stripe 支付</button>
+      <button class="btn" id="payBtn" type="button">前往 Stripe 支付（¥35）</button>
       <p class="msg" id="checkoutMsg" role="status"></p>
     </section>
 
@@ -222,14 +238,14 @@
   <script>
     // Deploy Worker 后改成你的 API 根地址（不要末尾斜杠）
     window.AIEXPLORER_LICENSE_API = "https://aiexplorer-license-api.xiangluo1019.workers.dev";
-    window.AIEXPLORER_PRICE_LABEL = "¥29";
+    window.AIEXPLORER_PRICE_LABEL = "¥35";
   </script>
   <script>
     (function () {
       var api = (window.AIEXPLORER_LICENSE_API || "").replace(/\/$/, "");
       var priceLabel = document.getElementById("priceLabel");
       if (window.AIEXPLORER_PRICE_LABEL) {
-        priceLabel.innerHTML = window.AIEXPLORER_PRICE_LABEL + "<span>/ 年 · 按机器绑定</span>";
+        priceLabel.innerHTML = window.AIEXPLORER_PRICE_LABEL + "<span>/ 年 · 按机器绑定</span><span class=\"price-was\">原价 ¥29</span>";
       }
 
       var params = new URLSearchParams(location.search);
