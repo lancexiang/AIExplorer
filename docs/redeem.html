@@ -175,7 +175,7 @@
 
   <main class="wrap">
     <h1>兑换授权</h1>
-    <p class="sub">适用于闲鱼等渠道获得的兑换码。填写兑换码与本机机器码，即可领取一年期 <code>.lic</code>（从本机首次激活起算）。</p>
+    <p class="sub">适用于闲鱼等渠道获得的兑换码（Plus ¥29 / Pro ¥59）。填写兑换码与本机机器码，即可领取对应档位一年期 <code>.lic</code>（从本机首次激活起算）。</p>
 
     <section id="formPanel" class="panel">
       <div class="field">
@@ -274,7 +274,7 @@
             formMsg.textContent = "";
             successPanel.classList.add("show");
             successMsg.className = "msg ok";
-            successMsg.textContent = "兑换成功（" + (res.j.code || "") + "）。请复制或下载下方许可证并在应用内激活。";
+            successMsg.textContent = "兑换成功（" + (res.j.code || "") + " · " + String(res.j.edition || "plus").toUpperCase() + "）。请复制或下载下方许可证并在应用内激活。";
             licenseText.value = res.j.license;
           })
           .catch(function (e) {

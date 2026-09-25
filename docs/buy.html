@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>购买一年授权 · AI Explorer</title>
-  <meta name="description" content="填写机器码，通过 Stripe 支付后自动获取一年授权许可证。" />
+  <title>购买授权 · AI Explorer</title>
+  <meta name="description" content="普通版永久免费；Plus ¥29/年、Pro ¥59/年。填写机器码后可通过 Stripe 或兑换码获取授权。" />
   <link rel="icon" href="favicon.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -90,6 +90,55 @@
       line-height: 1.5;
     }
     .price-note strong { color: var(--ink); font-weight: 600; }
+    .plans {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 640px) {
+      .plans { grid-template-columns: repeat(3, 1fr); }
+    }
+    .plan {
+      border: 1.5px solid var(--line);
+      border-radius: 16px;
+      padding: 18px 16px;
+      background: #fff;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .plan:hover { border-color: rgba(0,113,227,.35); }
+    .plan[aria-checked="true"] {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(0,113,227,.18);
+    }
+    .plan-name {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -.02em;
+    }
+    .plan-price {
+      margin-top: 8px;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -.03em;
+    }
+    .plan-price span {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--mute);
+      margin-left: 4px;
+    }
+    .plan-desc {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--mute);
+      line-height: 1.45;
+      font-weight: 400;
+    }
+    .plan-free { cursor: default; opacity: .92; }
+    .plan-free:hover { border-color: var(--line); }
     .panel {
       margin-top: 28px;
       padding: 22px 0 0;
@@ -195,10 +244,29 @@
   </nav>
 
   <main class="wrap">
-    <h1>购买一年授权</h1>
-    <p class="sub">固定价格。支付前填写本机机器码，付款成功后自动生成一年期 <code>.lic</code>（从本机首次激活起算），可在本页复制或下载。</p>
-    <p class="price" id="priceLabel">¥35<span>/ 年 · 按机器绑定</span><span class="price-was">原价 ¥29</span></p>
-    <p class="price-note">因 Stripe 国际支付手续费较高，在线价为 ¥35。更推荐：闲鱼购买后到 <a href="redeem.html" style="color:var(--blue);font-weight:600;">兑换页</a> 激活（¥29），或加入 QQ 群 <strong>1106799023</strong> 个人收款。</p>
+    <h1>选择授权档位</h1>
+    <p class="sub">普通版永久免费。Plus / Pro 按年授权、按机器绑定；付款成功后自动生成一年期 <code>.lic</code>（从本机首次激活起算）。</p>
+
+    <div class="plans" role="radiogroup" aria-label="授权档位">
+      <div class="plan plan-free" data-edition="standard" aria-checked="false">
+        <div class="plan-name">普通版</div>
+        <div class="plan-price">免费<span>永久</span></div>
+        <p class="plan-desc">基础文件管理。下载即可用，无需购买。</p>
+      </div>
+      <button type="button" class="plan" id="planPlus" data-edition="plus" aria-checked="true">
+        <div class="plan-name">Plus</div>
+        <div class="plan-price">¥29<span>/ 年</span></div>
+        <p class="plan-desc">预览、水平/垂直/无限分栏、收藏一键打开、磁盘占用、第三方空格预览、级列。</p>
+      </button>
+      <button type="button" class="plan" id="planPro" data-edition="pro" aria-checked="false">
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">¥59<span>/ 年</span></div>
+        <p class="plan-desc">含 Plus 全部能力，外加 AI 助手。</p>
+      </button>
+    </div>
+
+    <p class="price" id="priceLabel">¥35<span>/ 年 · Plus · Stripe</span><span class="price-was">标价 ¥29</span></p>
+    <p class="price-note">因 Stripe 国际支付手续费，在线价略高于标价（Plus ¥35 / Pro ¥69）。更推荐：闲鱼购买后到 <a href="redeem.html" style="color:var(--blue);font-weight:600;">兑换页</a> 按标价激活，或加入 QQ 群 <strong>1106799023</strong> 个人收款。</p>
 
     <section id="checkoutPanel" class="panel">
       <div class="field">
@@ -207,7 +275,7 @@
           placeholder="32 位十六进制，或粘贴 AIExplorer-MachineId:…" />
         <p class="hint">应用内：帮助 → 许可证状态 → 复制机器码。也可在安装向导激活页复制。</p>
       </div>
-      <button class="btn" id="payBtn" type="button">前往 Stripe 支付（¥35）</button>
+      <button class="btn" id="payBtn" type="button">前往 Stripe 支付（Plus · ¥35）</button>
       <p class="msg" id="checkoutMsg" role="status"></p>
     </section>
 
@@ -241,15 +309,47 @@
   <script>
     // Deploy Worker 后改成你的 API 根地址（不要末尾斜杠）
     window.AIEXPLORER_LICENSE_API = "https://aiexplorer-license-api.xiangluo1019.workers.dev";
-    window.AIEXPLORER_PRICE_LABEL = "¥35";
+    window.AIEXPLORER_PRICE_PLUS_STRIPE = "¥35";
+    window.AIEXPLORER_PRICE_PRO_STRIPE = "¥69";
   </script>
   <script>
     (function () {
       var api = (window.AIEXPLORER_LICENSE_API || "").replace(/\/$/, "");
+      var selectedEdition = "plus";
       var priceLabel = document.getElementById("priceLabel");
-      if (window.AIEXPLORER_PRICE_LABEL) {
-        priceLabel.innerHTML = window.AIEXPLORER_PRICE_LABEL + "<span>/ 年 · 按机器绑定</span><span class=\"price-was\">原价 ¥29</span>";
+      var payBtn = document.getElementById("payBtn");
+      var planPlus = document.getElementById("planPlus");
+      var planPro = document.getElementById("planPro");
+
+      function stripeLabel(edition) {
+        return edition === "pro"
+          ? (window.AIEXPLORER_PRICE_PRO_STRIPE || "¥69")
+          : (window.AIEXPLORER_PRICE_PLUS_STRIPE || "¥35");
       }
+
+      function listLabel(edition) {
+        return edition === "pro" ? "¥59" : "¥29";
+      }
+
+      function refreshPlanUi() {
+        planPlus.setAttribute("aria-checked", selectedEdition === "plus" ? "true" : "false");
+        planPro.setAttribute("aria-checked", selectedEdition === "pro" ? "true" : "false");
+        var online = stripeLabel(selectedEdition);
+        var name = selectedEdition === "pro" ? "Pro" : "Plus";
+        priceLabel.innerHTML =
+          online + "<span>/ 年 · " + name + " · Stripe</span><span class=\"price-was\">标价 " + listLabel(selectedEdition) + "</span>";
+        payBtn.textContent = "前往 Stripe 支付（" + name + " · " + online + "）";
+      }
+
+      planPlus.addEventListener("click", function () {
+        selectedEdition = "plus";
+        refreshPlanUi();
+      });
+      planPro.addEventListener("click", function () {
+        selectedEdition = "pro";
+        refreshPlanUi();
+      });
+      refreshPlanUi();
 
       var params = new URLSearchParams(location.search);
       var sessionId = params.get("session_id");
@@ -260,7 +360,6 @@
       var checkoutMsg = document.getElementById("checkoutMsg");
       var successMsg = document.getElementById("successMsg");
       var licenseText = document.getElementById("licenseText");
-      var payBtn = document.getElementById("payBtn");
       var machineInput = document.getElementById("machineId");
 
       function setCheckoutError(text) {
@@ -301,7 +400,7 @@
         fetch(api + "/api/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ machineId: machineId }),
+          body: JSON.stringify({ machineId: machineId, edition: selectedEdition }),
         })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
           .then(function (res) {
@@ -328,8 +427,9 @@
             if (!res.ok || !res.j.license) {
               throw new Error((res.j && res.j.error) || "签发失败");
             }
+            var ed = (res.j.edition || "plus").toUpperCase();
             successMsg.className = "msg ok";
-            successMsg.textContent = "支付成功。已签发一年授权（机器码 " + res.j.machineId + "，从本机首次激活起算）。请复制或下载下方许可证并在应用内激活。";
+            successMsg.textContent = "支付成功。已签发 " + ed + " 一年授权（机器码 " + res.j.machineId + "，从本机首次激活起算）。请复制或下载下方许可证并在应用内激活。";
             licenseText.value = res.j.license;
           })
           .catch(function (e) {

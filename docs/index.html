@@ -183,6 +183,67 @@
       font-weight: 300;
     }
 
+    .pricing {
+      background: var(--snow);
+      padding: 18vh 24px 10vh;
+      text-align: center;
+    }
+    .pricing h2 {
+      font-size: clamp(36px, 5vw, 52px);
+      font-weight: 600;
+      letter-spacing: -.04em;
+      line-height: 1.08;
+    }
+    .pricing > p {
+      margin: 14px auto 0;
+      max-width: 32em;
+      font-size: 18px;
+      font-weight: 300;
+      color: var(--mute);
+    }
+    .price-grid {
+      margin: 40px auto 0;
+      width: min(920px, 100%);
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      text-align: left;
+    }
+    @media (min-width: 720px) {
+      .price-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .price-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 20px;
+    }
+    .price-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -.02em;
+    }
+    .price-card .amt {
+      margin-top: 10px;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -.03em;
+    }
+    .price-card .amt span {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--mute);
+      margin-left: 4px;
+    }
+    .price-card ul {
+      margin: 14px 0 0;
+      padding: 0 0 0 1.1em;
+      color: var(--mute);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.55;
+    }
+
     footer {
       background: var(--snow);
       color: var(--mute);
@@ -243,7 +304,7 @@
     <h1 class="hero-copy">AI Explorer</h1>
     <p class="line hero-copy">把文件管理，做成生产力。</p>
     <a class="cta hero-copy" href="https://github.com/lancexiang/AIExplorer/releases/latest">开始试用</a>
-    <a class="cta hero-copy" href="buy.html" style="margin-left:10px;background:transparent;color:var(--blue);box-shadow:inset 0 0 0 1.5px var(--blue);">购买一年授权</a>
+    <a class="cta hero-copy" href="buy.html" style="margin-left:10px;background:transparent;color:var(--blue);box-shadow:inset 0 0 0 1.5px var(--blue);">查看定价</a>
     <div class="hero-visual">
       <img src="media/hero.png" alt="AI Explorer 主界面" width="3840" height="2100" />
     </div>
@@ -297,12 +358,45 @@
     <div class="chapter-shot"><img src="media/preview.png" alt="预览与编辑" width="3840" height="2100" loading="lazy" /></div>
   </section>
 
+  <section class="pricing" id="pricing">
+    <h2>普通免费。<br />Plus / Pro 按年解锁。</h2>
+    <p>试用期内可体验 Plus 与 Pro 全部能力。正式授权按机器绑定。</p>
+    <div class="price-grid">
+      <div class="price-card">
+        <h3>普通版</h3>
+        <div class="amt">免费<span>永久</span></div>
+        <ul>
+          <li>基础浏览、拷贝与标签</li>
+          <li>下载即可用，无需购买</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <h3>Plus</h3>
+        <div class="amt">¥29<span>/ 年</span></div>
+        <ul>
+          <li>文件预览、水平/垂直/无限分栏</li>
+          <li>收藏夹一键打开全部</li>
+          <li>磁盘占用、第三方空格预览、级列</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <h3>Pro</h3>
+        <div class="amt">¥59<span>/ 年</span></div>
+        <ul>
+          <li>含 Plus 全部能力</li>
+          <li>AI 助手</li>
+        </ul>
+      </div>
+    </div>
+    <a class="cta" href="buy.html" style="display:inline-flex;margin-top:32px;color:#fff;background:var(--blue);font-size:17px;font-weight:600;padding:12px 22px;border-radius:980px;">查看购买方式</a>
+  </section>
+
   <section class="finale" id="trial">
     <h2>持续打磨。<br />更好整理文件。</h2>
     <p>欢迎试用 AI Explorer，一起把文件管理做回生产力工具。</p>
     <a class="cta" href="https://github.com/lancexiang/AIExplorer/releases/latest">开始试用</a>
-    <a class="cta" href="buy.html" style="margin-left:10px;background:transparent;color:var(--blue);box-shadow:inset 0 0 0 1.5px var(--blue);">购买一年授权</a>
-    <p class="note">商业闭源版本 · 7 天试用 · Windows 10 / 11 x64</p>
+    <a class="cta" href="buy.html" style="margin-left:10px;background:transparent;color:var(--blue);box-shadow:inset 0 0 0 1.5px var(--blue);">购买授权</a>
+    <p class="note">商业闭源版本 · 试用期内 Plus / Pro 可用 · Windows 10 / 11 x64</p>
     <p class="note" style="margin-top:10px;">QQ 交流群：<strong style="color:var(--ink);font-weight:600;">1106799023</strong></p>
   </section>
 
