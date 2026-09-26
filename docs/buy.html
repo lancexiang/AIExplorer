@@ -245,7 +245,7 @@
 
   <main class="wrap">
     <h1>选择授权档位</h1>
-    <p class="sub">普通版永久免费。Plus / Pro 按年授权、按机器绑定；付款成功后自动生成一年期 <code>.lic</code>（从本机首次激活起算）。</p>
+    <p class="sub">普通版永久免费。Plus / Pro 按年授权、按机器绑定；付款成功后自动生成一年期 <code>.lic</code>（从签发时刻起算）。</p>
 
     <div class="plans" role="radiogroup" aria-label="授权档位">
       <div class="plan plan-free" data-edition="standard" aria-checked="false">
@@ -429,7 +429,7 @@
             }
             var ed = (res.j.edition || "plus").toUpperCase();
             successMsg.className = "msg ok";
-            successMsg.textContent = "支付成功。已签发 " + ed + " 一年授权（机器码 " + res.j.machineId + "，从本机首次激活起算）。请复制或下载下方许可证并在应用内激活。";
+            successMsg.textContent = "支付成功。已签发 " + ed + " 一年授权（机器码 " + res.j.machineId + "，有效期从签发时刻起算）。请复制或下载下方许可证并在应用内激活。";
             licenseText.value = res.j.license;
           })
           .catch(function (e) {
